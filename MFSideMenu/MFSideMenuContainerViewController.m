@@ -25,6 +25,7 @@ typedef enum {
 @property (nonatomic, assign) MFSideMenuPanDirection panDirection;
 
 @property (nonatomic, assign) BOOL viewHasAppeared;
+@property (nonatomic, strong) UIView *lowOpacityView;
 @end
 
 @implementation MFSideMenuContainerViewController
@@ -79,12 +80,24 @@ typedef enum {
     
     self.menuContainerView = [[UIView alloc] init];
     self.menuState = MFSideMenuStateClosed;
-    self.menuWidth = 270.0f;
+    self.menuWidth = 320.0f;
     self.menuSlideAnimationFactor = 3.0f;
-    self.menuAnimationDefaultDuration = 0.2f;
-    self.menuAnimationMaxDuration = 0.4f;
+    self.menuAnimationDefaultDuration = 0.37f;
+    self.menuAnimationMaxDuration = 0.39f;
     self.panMode = MFSideMenuPanModeDefault;
     self.viewHasAppeared = NO;
+}
+
+-(void)subcreatelowOpacityView
+{
+    self.lowOpacityView = [[UIView alloc] initWithFrame:self.view.frame];
+    [self.lowOpacityView setBackgroundColor:[UIColor blackColor]];
+    [self.lowOpacityView setAlpha:0.7];
+    self.lowOpacityView.hidden = YES;
+    self.lowOpacityView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+
+    
 }
 
 - (void)setupMenuContainerView {
@@ -92,17 +105,27 @@ typedef enum {
     
     self.menuContainerView.frame = self.view.bounds;
     self.menuContainerView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    [self.view insertSubview:menuContainerView atIndex:0];
+       [self.view insertSubview:menuContainerView atIndex:0];
     
     if(self.leftMenuViewController && !self.leftMenuViewController.view.superview) {
         [self.menuContainerView addSubview:self.leftMenuViewController.view];
+        
+        [self.view setBackgroundColor:[UIColor whiteColor]];
+       
+       
+        self.leftMenuViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.leftMenuViewController.view autoPinEdgeToSuperviewEdge:ALEdgeLeft withInset:1.0f];
+        [self.leftMenuViewController.view autoPinEdgeToSuperviewEdge:ALEdgeRight withInset:1.0f];
+        [self.leftMenuViewController.view autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:0.0f];
+        [self.leftMenuViewController.view autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:0.0f];
+       
     }
     
     if(self.rightMenuViewController && !self.rightMenuViewController.view.superview) {
         [self.menuContainerView addSubview:self.rightMenuViewController.view];
     }
 }
+
 
 #pragma mark -
 #pragma mark - View Lifecycle
@@ -125,35 +148,6 @@ typedef enum {
     }
 }
 
-- (void)viewWillLayoutSubviews {
-    [super viewWillLayoutSubviews];
-    
-    if([self respondsToSelector:@selector(topLayoutGuide)]) {
-        UIEdgeInsets insets = UIEdgeInsetsMake([self.topLayoutGuide length], 0, 0, 0);
-        if(_leftSideMenuViewController &&
-            [_leftSideMenuViewController automaticallyAdjustsScrollViewInsets] &&
-            [_leftSideMenuViewController.view respondsToSelector:@selector(setContentInset:)]) {
-            [(UIScrollView *)_leftSideMenuViewController.view setContentInset:insets];
-        }
-        if(_rightSideMenuViewController &&
-            [_rightSideMenuViewController automaticallyAdjustsScrollViewInsets] &&
-            [_rightSideMenuViewController.view respondsToSelector:@selector(setContentInset:)]) {
-            [(UIScrollView *)_rightSideMenuViewController.view setContentInset:insets];
-        }
-    }
-}
-
-
-- (UIStatusBarStyle)preferredStatusBarStyle {
-    if (self.centerViewController) {
-        if ([self.centerViewController isKindOfClass:[UINavigationController class]]) {
-            return [((UINavigationController *)self.centerViewController).topViewController preferredStatusBarStyle];
-        }
-        return [self.centerViewController preferredStatusBarStyle];
-    }
-    return UIStatusBarStyleDefault;
-}
-
 
 #pragma mark -
 #pragma mark - UIViewController Rotation
@@ -169,6 +163,7 @@ typedef enum {
 }
 
 -(BOOL)shouldAutorotate {
+    if(self.leftMenuViewController)[self.leftMenuViewController shouldAutorotate];
     if (self.centerViewController) {
         if ([self.centerViewController isKindOfClass:[UINavigationController class]]) {
             return [((UINavigationController *)self.centerViewController).topViewController shouldAutorotate];
@@ -177,7 +172,7 @@ typedef enum {
     }
     return YES;
 }
-
+/*
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
     if (self.centerViewController) {
         if ([self.centerViewController isKindOfClass:[UINavigationController class]]) {
@@ -199,7 +194,7 @@ typedef enum {
     
     [self.shadow shadowedViewDidRotate];
 }
-
+*/
 
 #pragma mark -
 #pragma mark - UIViewController Containment
@@ -222,6 +217,7 @@ typedef enum {
 - (void)setCenterViewController:(UIViewController *)centerViewController {
     [self removeCenterGestureRecognizers];
     [self removeChildViewControllerFromContainer:_centerViewController];
+    self.shadow = nil;
     
     CGPoint origin = ((UIViewController *)_centerViewController).view.frame.origin;
     _centerViewController = centerViewController;
@@ -233,13 +229,34 @@ typedef enum {
     
     [_centerViewController didMoveToParentViewController:self];
     
-    if(self.shadow) {
-        [self.shadow setShadowedView:centerViewController.view];
-    } else {
-        self.shadow = [MFSideMenuShadow shadowWithView:[_centerViewController view]];
+    [self subcreatelowOpacityView];
+    
+    if ([self.centerViewController isKindOfClass:[UINavigationController class]]) {
+        
+        [((UINavigationController *)self.centerViewController).topViewController.view addSubview:self.lowOpacityView];
+         [((UINavigationController *)self.centerViewController).topViewController.view bringSubviewToFront:self.lowOpacityView];
     }
+    else
+        
+    {
+        [((UIViewController *)self.centerViewController).view addSubview:self.lowOpacityView];
+        [((UIViewController *)self.centerViewController).view bringSubviewToFront:self.lowOpacityView];
+
+    }
+    
+    /*********** Low Opacity View ***************************************************/
+    
+    [self.lowOpacityView autoPinEdgeToSuperviewEdge:ALEdgeLeft withInset:0.0f];
+    [self.lowOpacityView autoPinEdgeToSuperviewEdge:ALEdgeBottom withInset:0.0f];
+    [self.lowOpacityView autoPinEdgeToSuperviewEdge:ALEdgeRight withInset:0.0f];
+    [self.lowOpacityView autoPinEdgeToSuperviewEdge:ALEdgeTop withInset:0.0f];
+    
+    self.shadow = [MFSideMenuShadow shadowWithView:[_centerViewController view]];
     [self.shadow draw];
     [self addCenterGestureRecognizers];
+    
+    
+    
 }
 
 - (void)setRightMenuViewController:(UIViewController *)rightSideMenuViewController {
@@ -308,22 +325,35 @@ typedef enum {
 }
 
 
+
 #pragma mark -
 #pragma mark - Menu State
 
 - (void)toggleLeftSideMenuCompletion:(void (^)(void))completion {
+
+    self.panGestureVelocity = 0.0;
+    
     if(self.menuState == MFSideMenuStateLeftMenuOpen) {
         [self setMenuState:MFSideMenuStateClosed completion:completion];
+         self.lowOpacityView.hidden = YES;
     } else {
         [self setMenuState:MFSideMenuStateLeftMenuOpen completion:completion];
+         self.lowOpacityView.hidden = NO;
     }
 }
 
 - (void)toggleRightSideMenuCompletion:(void (^)(void))completion {
+    
+    self.panGestureVelocity = 0.0;
+    
     if(self.menuState == MFSideMenuStateRightMenuOpen) {
         [self setMenuState:MFSideMenuStateClosed completion:completion];
+        self.lowOpacityView.hidden = YES;
+
     } else {
         [self setMenuState:MFSideMenuStateRightMenuOpen completion:completion];
+        self.lowOpacityView.hidden = NO;
+
     }
 }
 
@@ -364,6 +394,7 @@ typedef enum {
             [self closeSideMenuCompletion:^{
                 [self.leftMenuViewController view].hidden = YES;
                 [self.rightMenuViewController view].hidden = YES;
+                [self.lowOpacityView setHidden:YES];
                 innerCompletion();
             }];
             break;
@@ -372,12 +403,14 @@ typedef enum {
             if(!self.leftMenuViewController) return;
             [self sendStateEventNotification:MFSideMenuStateEventMenuWillOpen];
             [self leftMenuWillShow];
+            [self.lowOpacityView setHidden:NO];
             [self openLeftSideMenuCompletion:innerCompletion];
             break;
         case MFSideMenuStateRightMenuOpen:
             if(!self.rightMenuViewController) return;
             [self sendStateEventNotification:MFSideMenuStateEventMenuWillOpen];
             [self rightMenuWillShow];
+            [self.lowOpacityView setHidden:NO];
             [self openRightSideMenuCompletion:innerCompletion];
             break;
         default:
@@ -419,7 +452,7 @@ typedef enum {
     leftFrame.origin.x = (self.menuSlideAnimationEnabled) ? -1*leftFrame.size.width / self.menuSlideAnimationFactor : 0;
     leftFrame.origin.y = 0;
     [self.leftMenuViewController view].frame = leftFrame;
-    [self.leftMenuViewController view].autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleHeight;
+    [self.leftMenuViewController view].autoresizingMask = UIViewAutoresizingNone;//UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleHeight;
 }
 
 - (void) setRightSideMenuFrameToClosedPosition {
@@ -545,11 +578,6 @@ typedef enum {
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
-    if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-        CGPoint velocity = [(UIPanGestureRecognizer *)gestureRecognizer velocityInView:gestureRecognizer.view];
-        BOOL isHorizontalPanning = fabsf(velocity.x) > fabsf(velocity.y);
-        return isHorizontalPanning;
-    }
     return YES;
 }
 
@@ -733,14 +761,13 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
                              animated:(BOOL)animated
                            completion:(void (^)(void))completion {
     void (^innerCompletion)() = ^ {
-        self.panGestureVelocity = 0.0;
         if(completion) completion();
     };
     
     if(animated) {
         CGFloat centerViewControllerXPosition = ABS([self.centerViewController view].frame.origin.x);
         CGFloat duration = [self animationDurationFromStartPosition:centerViewControllerXPosition toEndPosition:offset];
-        
+        duration = 0.5;
         [UIView animateWithDuration:duration animations:^{
             [self setCenterViewControllerOffset:offset];
             if(additionalAnimations) additionalAnimations();
