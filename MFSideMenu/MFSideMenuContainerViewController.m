@@ -8,6 +8,7 @@
 
 #import "MFSideMenuContainerViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "PureLayout.h"
 
 NSString * const MFSideMenuStateNotificationEvent = @"MFSideMenuStateNotificationEvent";
 
