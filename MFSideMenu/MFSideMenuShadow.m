@@ -71,11 +71,12 @@
 #pragma mark - Drawing
 
 - (void)draw {
-    if(_enabled) {
+   /* if(_enabled) {
         [self show];
     } else {
         [self hide];
     }
+    */
 }
 
 - (void)show {
