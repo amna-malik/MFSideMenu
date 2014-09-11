@@ -819,4 +819,13 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     return MIN(duration, self.menuAnimationMaxDuration);
 }
 
+#pragma mark - Statusbar style update
+
+- (UIViewController *)childViewControllerForStatusBarStyle {
+    if (self.centerViewController) {
+        return self.centerViewController;
+    }
+    return [super childViewControllerForStatusBarStyle];
+}
+
 @end
