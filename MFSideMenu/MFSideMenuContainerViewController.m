@@ -312,15 +312,29 @@ typedef enum {
     if (self.centerViewController)
     {
         [[self.centerViewController view] addGestureRecognizer:[self centerTapGestureRecognizer]];
+        [[self.centerViewController view] addGestureRecognizer:[self centerDoubleTapGestureRecognizer]];
         [[self.centerViewController view] addGestureRecognizer:[self panGestureRecognizer]];
     }
 }
+
+- (UITapGestureRecognizer *)centerDoubleTapGestureRecognizer
+{
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
+                                             initWithTarget:self
+                                             action:@selector(centerViewControllerDoubleTapped:)];
+    tapRecognizer.numberOfTapsRequired = 2;
+   // tapRecognizer.numberOfTouchesRequired = 4;
+    [tapRecognizer setDelegate:self];
+    return tapRecognizer;
+}
+
 
 - (UITapGestureRecognizer *)centerTapGestureRecognizer
 {
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
                                              initWithTarget:self
                                              action:@selector(centerViewControllerTapped:)];
+   
     [tapRecognizer setDelegate:self];
     return tapRecognizer;
 }
@@ -575,7 +589,7 @@ typedef enum {
         return YES;
     }
     
-    return NO;
+    return YES;
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
@@ -584,7 +598,7 @@ typedef enum {
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-	return NO;
+	return YES;
 }
 
 
@@ -731,6 +745,10 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 	} else {
         [self setCenterViewControllerOffset:translatedPoint.x];
     }
+}
+
+- (void)centerViewControllerDoubleTapped:(UITapGestureRecognizer *)sender {
+    [self.delegate containerViewControllerDoubleTapped:self withGestureRecongizer:sender];
 }
 
 - (void)centerViewControllerTapped:(id)sender {

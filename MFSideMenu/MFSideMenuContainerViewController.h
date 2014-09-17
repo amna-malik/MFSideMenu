@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MFSideMenuShadow.h"
+#import "MFSideMenuDelegate.h"
 
 extern NSString * const MFSideMenuStateNotificationEvent;
 
@@ -60,7 +61,7 @@ typedef enum {
 // menu slide-in animation
 @property (nonatomic, assign) BOOL menuSlideAnimationEnabled;
 @property (nonatomic, assign) CGFloat menuSlideAnimationFactor; // higher = less menu movement on animation
-
+@property (nonatomic, weak) id<MFSliderMenuDelegate> delegate;
 
 - (void)toggleLeftSideMenuCompletion:(void (^)(void))completion;
 - (void)toggleRightSideMenuCompletion:(void (^)(void))completion;
