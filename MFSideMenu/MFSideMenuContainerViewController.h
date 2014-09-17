@@ -61,7 +61,7 @@ typedef enum {
 // menu slide-in animation
 @property (nonatomic, assign) BOOL menuSlideAnimationEnabled;
 @property (nonatomic, assign) CGFloat menuSlideAnimationFactor; // higher = less menu movement on animation
-@property (nonatomic, weak) id<MFSliderMenuDelegate> delegate;
+@property (nonatomic, weak) id<MFSideMenuDelegate> delegate;
 
 - (void)toggleLeftSideMenuCompletion:(void (^)(void))completion;
 - (void)toggleRightSideMenuCompletion:(void (^)(void))completion;
