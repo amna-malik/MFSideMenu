@@ -14,6 +14,6 @@
 
 @optional
 
-- (void)containerViewControllerDoubleTapped:(MFSideMenuContainerViewController *)containerViewController withGestureRecongizer:(UITapGestureRecognizer *)gestureRecognizer;
+- (void)containerViewControllerTapped:(MFSideMenuContainerViewController *)containerViewController withGestureRecongizer:(UITapGestureRecognizer *)gestureRecognizer;
 
 @end
