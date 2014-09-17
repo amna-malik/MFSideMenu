@@ -312,20 +312,19 @@ typedef enum {
     if (self.centerViewController)
     {
         [[self.centerViewController view] addGestureRecognizer:[self centerTapGestureRecognizer]];
-        [[self.centerViewController view] addGestureRecognizer:[self centerDoubleTapGestureRecognizer]];
         [[self.centerViewController view] addGestureRecognizer:[self panGestureRecognizer]];
     }
 }
 
-- (UITapGestureRecognizer *)centerDoubleTapGestureRecognizer
+- (void)setupTapGestureRecognizerWithnumberOfTapsRequired:(int)numberOfTaps numberOfTouchesRequired:(int)numberOfTouces
 {
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
                                              initWithTarget:self
                                              action:@selector(centerViewControllerDoubleTapped:)];
-    tapRecognizer.numberOfTapsRequired = 2;
-   // tapRecognizer.numberOfTouchesRequired = 4;
+    tapRecognizer.numberOfTapsRequired = numberOfTaps;
+    tapRecognizer.numberOfTouchesRequired = numberOfTouces;
     [tapRecognizer setDelegate:self];
-    return tapRecognizer;
+    [[self.centerViewController view] addGestureRecognizer:tapRecognizer];
 }
 
 
@@ -748,7 +747,8 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
 }
 
 - (void)centerViewControllerDoubleTapped:(UITapGestureRecognizer *)sender {
-    [self.delegate containerViewControllerDoubleTapped:self withGestureRecongizer:sender];
+    if([self.delegate respondsToSelector:@selector(containerViewControllerTapped:withGestureRecongizer:)])
+        [self.delegate containerViewControllerTapped:self withGestureRecongizer:sender];
 }
 
 - (void)centerViewControllerTapped:(id)sender {
