@@ -261,6 +261,7 @@ typedef enum {
 }
 
 - (void)setRightMenuViewController:(UIViewController *)rightSideMenuViewController {
+    
     [self removeChildViewControllerFromContainer:_rightSideMenuViewController];
     
     _rightSideMenuViewController = rightSideMenuViewController;
@@ -276,10 +277,12 @@ typedef enum {
 }
 
 - (void)removeChildViewControllerFromContainer:(UIViewController *)childViewController {
+  
     if(!childViewController) return;
     [childViewController willMoveToParentViewController:nil];
     [childViewController removeFromParentViewController];
     [childViewController.view removeFromSuperview];
+    childViewController = nil;
 }
 
 
@@ -592,12 +595,14 @@ typedef enum {
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    
     return YES;
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-	return YES;
+
+    return self.menuState == MFSideMenuStateClosed;
 }
 
 
